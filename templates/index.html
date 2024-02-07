@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        label {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        label:hover {
+            background-color: #45a049;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #imageContainer {
+            margin-top: 20px;
+        }
+
+        #predictionContainer {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plant Disease Detection</h1>
+
+        <!-- Hidden input field for selecting an image -->
+        <input type="file" id="imageInput" accept="image/*">
+        <label for="imageInput" id="chooseLabel">Choose Image</label>
+
+        <button onclick="predict()">Predict Disease</button>
+
+        <!-- Display selected image -->
+        <div id="imageContainer"></div>
+
+        <!-- Display prediction -->
+        <div id="predictionContainer"></div>
+    </div>
+
+    <script>
+        function predict() {
+            // Get the selected image file
+            const imageInput = document.getElementById('imageInput');
+            const imageFile = imageInput.files[0];
+
+            // Display the selected image
+            const imageContainer = document.getElementById('imageContainer');
+            const imageElement = document.createElement('img');
+            imageElement.src = URL.createObjectURL(imageFile);
+            imageElement.style.maxWidth = '500px';
+            imageContainer.innerHTML = '';
+            imageContainer.appendChild(imageElement);
+
+            // Submit the image file to the server for prediction
+            const formData = new FormData();
+            formData.append('file', imageFile);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the prediction result
+                const predictionContainer = document.getElementById('predictionContainer');
+                predictionContainer.textContent = `Disease: ${data.disease}, Confidence: ${data.confidence.toFixed(2)}%`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Update label text when an image is selected
+        const imageInput = document.getElementById('imageInput');
+        const chooseLabel = document.getElementById('chooseLabel');
+        imageInput.addEventListener('change', () => {
+            const filename = imageInput.files[0].name;
+            chooseLabel.textContent = filename;
+        });
+    </script>
+</body>
+</html>
